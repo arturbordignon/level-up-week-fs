@@ -28,6 +28,24 @@ ticketRoutes.post("/:eventId/tickets", async (req, res) => {
   res.status(204).send();
 });
 
-ticketRoutes.get("/:eventId/tickets", (req, res) => {});
+ticketRoutes.get("/:eventId/tickets", async (req, res) => {
+  const { eventId } = req.params;
+  const ticketService = new TicketService();
+  const data = await ticketService.findByEventId(+eventId);
+  res.json(data);
+});
 
-ticketRoutes.get("/:eventId/tickets/:ticketId", (req, res) => {});
+ticketRoutes.get("/:eventId/tickets/:ticketId", async (req, res) => {
+  const { eventId, ticketId } = req.params;
+  const ticketService = new TicketService();
+  const ticket = await ticketService.findById(+eventId, +ticketId);
+
+  if (!ticket) {
+    res.status(404).json({
+      message: "Ticket not found",
+    });
+    return;
+  }
+
+  res.json(ticket);
+});

@@ -13,30 +13,23 @@ export class CustomerService {
     const { name, email, password, address, phone } = data;
 
     const connection = await Database.getInstance().getConnection();
-
     try {
       await connection.beginTransaction();
-
       const user = await UserModel.create(
         {
           name,
           email,
           password,
         },
-        {
-          connection,
-        }
+        { connection }
       );
-
       const customer = await CustomerModel.create(
         {
           user_id: user.id,
           address,
           phone,
         },
-        {
-          connection,
-        }
+        { connection }
       );
       await connection.commit();
       return {
@@ -50,6 +43,12 @@ export class CustomerService {
     } catch (e) {
       await connection.rollback();
       throw e;
+    } finally {
+      await connection.release();
     }
+  }
+
+  async findByUserId(userId: number): Promise<CustomerModel | null> {
+    return CustomerModel.findByUserId(userId, { user: true });
   }
 }
